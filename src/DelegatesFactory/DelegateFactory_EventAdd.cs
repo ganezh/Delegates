@@ -10,7 +10,6 @@ namespace Delegates
     /// </summary>
     public static partial class DelegateFactory
     {
-        //TODO:Consider adding EventInvoke
         /// <summary>
         /// Creates delegate for adding event handler with source instance type and event argument type
         /// </summary>
@@ -39,6 +38,7 @@ namespace Delegates
         public static Action<TSource, TDelegate> EventAddCustomDelegate<TSource, TDelegate>
             (string eventName) where TDelegate : class
         {
+            DelegateHelper.CheckDelegate<TDelegate>();
             return EventAccessor<TSource, TDelegate>(eventName, TypeExtensions.AddAccessor);
         }
 
@@ -113,15 +113,13 @@ namespace Delegates
             if (accessor != null)
             {
                 var handlerType = accessor.GetParameters()[0].ParameterType;
-                DelegateHelper.IsCompatible<TDelegate>(handlerType);
                 if (typeof(TDelegate) == handlerType)
                 {
                     var eventArgsType = typeof(TDelegate).GetDelegateSecondParameter();
                     accessor.IsEventArgsTypeCorrect(eventArgsType);
                     return accessor.CreateDelegate<Action<TSource, TDelegate>>();
                 }
-                DelegateHelper.CheckDelegate<TDelegate>();
-                DelegateHelper.IsCompatible<TDelegate>(accessor.GetParameters()[0].ParameterType);
+                DelegateHelper.IsCompatible<TDelegate>(handlerType);
                 return EventAccessorImpl<Action<TSource, TDelegate>>(typeof(TSource), eventName, accessorName);
             }
             return null;
